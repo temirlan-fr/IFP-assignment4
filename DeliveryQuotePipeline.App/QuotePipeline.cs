@@ -17,21 +17,19 @@ public static class QuotePipeline
     }
 
     public static IReadOnlyList<DeliveryQuote> CalculateQuotes(
-        IReadOnlyList<DeliveryRequest> requests)
+        IReadOnlyList<DeliveryRequest> requests,
+        string policyName,
+        Func<DeliveryRequest, decimal> pricePolicy)
     {
         DeliveryQuote[] quotes = requests
             .Select(request =>
             {
-                decimal price = 500 + request.DistanceKm * 100;
-
-                if (request.IsFragile)
-                {
-                    price += 200;
-                }
+                decimal price = pricePolicy(request);
 
                 return new DeliveryQuote(
                     request.RequestId,
                     request.CustomerName,
+                    policyName,
                     price);
             })
             .ToArray();

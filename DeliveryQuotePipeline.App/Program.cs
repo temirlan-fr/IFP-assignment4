@@ -35,16 +35,43 @@ IReadOnlyList<DeliveryRequest> readOnlyRequests =
 IReadOnlyList<DeliveryRequest> selectedRequests =
     QuotePipeline.SelectEligible(readOnlyRequests);
 
-IReadOnlyList<DeliveryQuote> quotes =
-    QuotePipeline.CalculateQuotes(selectedRequests);
+Func<DeliveryRequest, decimal> standardPolicy =
+    PricingPolicies.Standard;
 
-DeliveryQuoteSummary summary =
-    QuotePipeline.CreateSummary(quotes);
+Func<DeliveryRequest, decimal> expressPolicy =
+    PricingPolicies.Express;
+
+IReadOnlyList<DeliveryQuote> standardQuotes =
+    QuotePipeline.CalculateQuotes(
+        selectedRequests,
+        "Standard",
+        standardPolicy);
+
+IReadOnlyList<DeliveryQuote> expressQuotes =
+    QuotePipeline.CalculateQuotes(
+        selectedRequests,
+        "Express",
+        expressPolicy);
+
+DeliveryQuoteSummary standardSummary =
+    QuotePipeline.CreateSummary(standardQuotes);
+
+DeliveryQuoteSummary expressSummary =
+    QuotePipeline.CreateSummary(expressQuotes);
 
 Console.WriteLine();
-Console.WriteLine("Delivery quotes:");
+Console.WriteLine("Standard policy:");
 
-foreach (DeliveryQuote quote in summary.Quotes)
+foreach (DeliveryQuote quote in standardSummary.Quotes)
+{
+    Console.WriteLine(
+        $"{quote.RequestId} {quote.CustomerName}: {quote.Price}");
+}
+
+Console.WriteLine();
+Console.WriteLine("Express policy:");
+
+foreach (DeliveryQuote quote in expressSummary.Quotes)
 {
     Console.WriteLine(
         $"{quote.RequestId} {quote.CustomerName}: {quote.Price}");
