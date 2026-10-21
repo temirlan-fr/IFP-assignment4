@@ -1,0 +1,6 @@
+RequestId,CustomerName,DistanceKm,WeightKg,IsFragile
+R-001,Arunaz,2,3,false
+R-002,Temirlan,50,20,true
+R-003,Aliakhmet,-1,2,false
+R-004,Danagul,12,1,true
+R-005,Miras,0,0.5,false
