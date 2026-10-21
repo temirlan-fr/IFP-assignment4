@@ -1,4 +1,5 @@
 ﻿using DeliveryQuotePipeline.App;
+using System.Linq;
 
 string[] inputLines =
 {
@@ -9,6 +10,8 @@ string[] inputLines =
     "R-005,Mira,0,0.5,false"
 };
 
+List<DeliveryRequest> validRequests = new();
+
 foreach (string inputLine in inputLines)
 {
     bool isValid = DeliveryRequestParser.TryParse(
@@ -18,11 +21,31 @@ foreach (string inputLine in inputLines)
 
     if (isValid && request is not null)
     {
-        Console.WriteLine(
-            $"{request.RequestId} accepted for {request.CustomerName}");
+        validRequests.Add(request);
     }
     else
     {
-        Console.WriteLine($"{inputLine} rejected: {error}");
+        Console.WriteLine($"Rejected: {error}");
     }
+}
+
+IReadOnlyList<DeliveryRequest> readOnlyRequests =
+    Array.AsReadOnly(validRequests.ToArray());
+
+IReadOnlyList<DeliveryRequest> selectedRequests =
+    QuotePipeline.SelectEligible(readOnlyRequests);
+
+IReadOnlyList<DeliveryQuote> quotes =
+    QuotePipeline.CalculateQuotes(selectedRequests);
+
+DeliveryQuoteSummary summary =
+    QuotePipeline.CreateSummary(quotes);
+
+Console.WriteLine();
+Console.WriteLine("Delivery quotes:");
+
+foreach (DeliveryQuote quote in summary.Quotes)
+{
+    Console.WriteLine(
+        $"{quote.RequestId} {quote.CustomerName}: {quote.Price}");
 }
